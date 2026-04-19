@@ -1,13 +1,5 @@
 {
   "dependencies": {
-<<<<<<< HEAD
-    "com.unity.2d.sprite": {
-      "version": "1.0.0",
-      "depth": 0,
-      "source": "builtin",
-      "dependencies": {}
-    },
-=======
     "com.unity.2d.animation": {
       "version": "14.0.3",
       "depth": 1,
@@ -71,7 +63,7 @@
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
-      "depth": 1,
+      "depth": 0,
       "source": "builtin",
       "dependencies": {}
     },
@@ -116,7 +108,6 @@
       },
       "url": "https://packages.unity.com"
     },
->>>>>>> 1612322b65b6abead91f664e2065f3f51f27703e
     "com.unity.ai.navigation": {
       "version": "2.0.11",
       "depth": 0,

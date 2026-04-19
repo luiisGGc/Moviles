@@ -1357,6 +1357,21 @@ MonoBehaviour:
   - nombreEscena: MantenerVolando
     instruccionBreve: Manten el vuelo!
     accionRequerida: 0
+  - nombreEscena: nivel 1
+    instruccionBreve: Manten el vuelo!
+    accionRequerida: 1
+  - nombreEscena: nivel 2
+    instruccionBreve: Manten el vuelo!
+    accionRequerida: 1
+  - nombreEscena: nivel 3
+    instruccionBreve: Manten el vuelo!
+    accionRequerida: 1
+  - nombreEscena: nivel 4
+    instruccionBreve: Manten el vuelo!
+    accionRequerida: 1
+  - nombreEscena: nivel 5
+    instruccionBreve: Manten el vuelo!
+    accionRequerida: 1
   pantallaTransicion: {fileID: 1805858193}
   textoInstruccion: {fileID: 99425569}
   iconoAccion: {fileID: 1425385074}
