@@ -5,8 +5,29 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scripts/Carlos/MainMenu/MainMenu.unity
+    guid: 0ea3554700353da4ca902bd6acf1e106
+  - enabled: 1
+    path: Assets/Scripts/Carlos/GameManager/GameManager.unity
+    guid: a20b2492b60685c4a85bef8657e9e25d
+  - enabled: 1
+    path: Assets/Scripts/Carlos/Sopa/EnfriarSopa.unity
+    guid: 787868df152450d4f888fb32fafe43d1
+  - enabled: 1
+    path: Assets/Scripts/Carlos/Dragon/BebeDragon.unity
+    guid: 92437581bacbd8045a04e9680cd13633
+  - enabled: 1
+    path: Assets/Scripts/Carlos/ApagaLaVela/ApagaLaVela.unity
+    guid: c9f80d747b7fd8f499e750d33ae2831a
+  - enabled: 1
+    path: Assets/Scripts/Carlos/Volando/MantenerVolando.unity
+    guid: e28646b90ba76564b85290db4eb8493a
+  - enabled: 1
+    path: Assets/Scripts/Carlos/Globo/InflarGlobo.unity
+    guid: c1a8b0e63eef91946b879943f98590c3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
