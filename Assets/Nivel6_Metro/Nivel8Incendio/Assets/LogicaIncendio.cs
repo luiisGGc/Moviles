@@ -4,17 +4,17 @@ using UnityEngine.UI;
 public class LogicaIncendio : MonoBehaviour
 {
     [Header("UI de Progreso")]
-    public Image barraProgreso; 
-    public float velocidadDescenso = 0.15f; 
-    public float fuerzaClick = 0.08f; 
+    public Image barraProgreso;
+    public float velocidadDescenso = 0.15f;
+    public float fuerzaClick = 0.08f;
 
     [Header("Sprites de la Puerta")]
-    public Image imagenPuerta; 
+    public Image imagenPuerta;
     public Sprite puertaConFuego;
     public Sprite puertaAbierta;
 
     [Header("Ganar")]
-    public GameObject mensajeGanaste; 
+    public GameObject mensajeGanaste;
 
     private float progresoActual = 0f;
     private bool juegoTerminado = false;
@@ -54,8 +54,12 @@ public class LogicaIncendio : MonoBehaviour
     void Ganar()
     {
         juegoTerminado = true;
-        imagenPuerta.sprite = puertaAbierta; 
+        imagenPuerta.sprite = puertaAbierta;
         mensajeGanaste.SetActive(true);
         Debug.Log("¡Escapaste del incendio!");
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ReportarVictoria();
+        }
     }
 }

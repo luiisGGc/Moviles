@@ -97,6 +97,7 @@ public class MecanicaMetro : MonoBehaviour
             if (grupoTutorial) grupoTutorial.SetActive(false);
             if (textoPerdiste) textoPerdiste.SetActive(true);
             Debug.Log("Tiempo agotado.");
+            GameManager.Instance.ReportarDerrota();
         }
     }
 
@@ -125,6 +126,7 @@ public class MecanicaMetro : MonoBehaviour
             if (textoVictoria) textoVictoria.SetActive(true);
 
             Debug.Log("¡Victoria! Nivel completado.");
+            GameManager.Instance.ReportarVictoria();
 
             enabled = false;
         }

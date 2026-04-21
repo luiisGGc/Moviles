@@ -42,5 +42,9 @@ public class LogicaFugaGas : MonoBehaviour
         completado = true;
         imagenTuberia.sprite = tuberiaArreglada;
         cartelVictoria.SetActive(true);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ReportarVictoria();
+        }
     }
 }
