@@ -1,11 +1,14 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {}
     },
+=======
+>>>>>>> fdddb45941cbcdd3ec33f328c603f6e672eb3c0f
     "com.unity.2d.animation": {
       "version": "14.0.3",
       "depth": 1,
@@ -69,7 +72,7 @@
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
-      "depth": 1,
+      "depth": 0,
       "source": "builtin",
       "dependencies": {}
     },
