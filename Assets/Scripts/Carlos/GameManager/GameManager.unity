@@ -1264,34 +1264,22 @@ MonoBehaviour:
     instruccionBreve: Manten el vuelo!
     accionRequerida: 0
   - nombreEscena: nivel 1
-    instruccionBreve: Manten el balance!
-    accionRequerida: 2
-  - nombreEscena: nivel 2
-    instruccionBreve: Limpia Rapido!
-    accionRequerida: 1
-  - nombreEscena: nivel 3
     instruccionBreve: Explota el globo!
     accionRequerida: 1
+  - nombreEscena: nivel 3
+    instruccionBreve: Manten el balance!
+    accionRequerida: 2
   - nombreEscena: nivel 4
     instruccionBreve: Agita la soda!
     accionRequerida: 2
   - nombreEscena: nivel 5
     instruccionBreve: Calienta el sol!
     accionRequerida: 1
-  - nombreEscena: CANDADO
-    instruccionBreve: "\xA1Haz click! "
-    accionRequerida: 1
-  - nombreEscena: CARGADOR
-    instruccionBreve: "\xA1Conecta el cable!"
-    accionRequerida: 1
   - nombreEscena: GAS
     instruccionBreve: "\xA1Manten Presionado!"
     accionRequerida: 1
   - nombreEscena: INCENDIO
     instruccionBreve: "\xA1Toca rapido! "
-    accionRequerida: 1
-  - nombreEscena: METRO
-    instruccionBreve: "\xA1Desliza r\xE1pido! "
     accionRequerida: 1
   pantallaTransicion: {fileID: 1805858193}
   textoInstruccion: {fileID: 99425569}

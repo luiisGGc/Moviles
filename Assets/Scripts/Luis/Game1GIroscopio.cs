@@ -1,104 +1,98 @@
 using UnityEngine;
-using TMPro; // Necesario para usar TextMeshPro
+using TMPro;
 
 public sealed class GyroBalance : MonoBehaviour
 {
     [Header("Configuración de Equilibrio")]
     [SerializeField] private float sensitivity = 50.0f; 
-    [SerializeField] private float gravityForce = 60f; // Aumentado para que caiga más rápido
+    [SerializeField] private float gravityForce = 60f; 
     [SerializeField] private float maxAngle = 45f;
-
-    [Header("Referencias UI")]
-    [SerializeField] private GameObject loseText; // Arrastra aquí tu letrero de "Perdiste"
+    [SerializeField] private float tiempoParaGanar = 10f; // Tiempo que debe aguantar
 
     [Header("Sprites de Estado")]
     [SerializeField] private SpriteRenderer characterRenderer; 
-    [SerializeField] private Sprite spriteNormal;   // El 1.1 de la imagen
-    [SerializeField] private Sprite spritePreocupado; // El 1.2
-    [SerializeField] private Sprite spriteSudando;   // El 1.3
-    private float currentZRotation = 0f;
-    private bool isGameOver = false;
+    [SerializeField] private Sprite spriteNormal;   
+    [SerializeField] private Sprite spritePreocupado; 
+    [SerializeField] private Sprite spriteSudando;
+    [SerializeField] private Sprite spriteGanar;   // Sprite de victoria
+    [SerializeField] private Sprite spritePerder;  // Sprite de derrota
 
-void Start()
+    private float currentZRotation = 0f;
+    private float tiempoTranscurrido = 0f;
+    private bool gameOver = false; // Cambiado a minúscula para coincidir con tu estructura
+
+    void Start()
     {
         Input.gyro.enabled = true;
         if (characterRenderer == null) characterRenderer = GetComponent<SpriteRenderer>();
     }
+
     void Update()
     {
-        // Si ya perdió, no ejecutamos el movimiento
-        if (isGameOver) return;
+        if (gameOver) return;
 
-        float inputX = 0f;
-
-        if (Input.gyro.enabled)
+        // Lógica de tiempo para ganar
+        tiempoTranscurrido += Time.deltaTime;
+        if (tiempoTranscurrido >= tiempoParaGanar)
         {
-            inputX = Input.gyro.rotationRateUnbiased.z;
-        }
-        else
-        {
-            inputX = Input.GetAxis("Horizontal");
+            WinGame();
         }
 
-        // 1. Aplicamos el giro del usuario
+        float inputX = Input.gyro.enabled ? Input.gyro.rotationRateUnbiased.z : Input.GetAxis("Horizontal");
+
         currentZRotation += inputX * sensitivity * Time.deltaTime;
-
-        // 2. Efecto de gravedad (caída automática)
-        // Multiplicamos por un factor extra si quieres que sea aún más rápido al alejarse del centro
         float gravityEffect = (currentZRotation / maxAngle) * gravityForce;
         currentZRotation += gravityEffect * Time.deltaTime;
-
-        // 3. Limitar ángulo para el cálculo visual
         currentZRotation = Mathf.Clamp(currentZRotation, -maxAngle - 10f, maxAngle + 10f);
 
-        // 4. APLICAR AL TRANSFORM
         transform.rotation = Quaternion.Euler(0, 0, currentZRotation);
         ActualizarExpresion();
-        // 5. CONDICIÓN DE DERROTA
+
         if (Mathf.Abs(currentZRotation) > maxAngle)
         {
-            GameOver();
+            LoseGame();
         }
     }
 
-    void GameOver()
+    // --- ESTRUCTURA SOLICITADA ---
+
+    private void WinGame()
     {
-        isGameOver = true;
-        if (loseText != null)
-        {
-            loseText.SetActive(true); // Muestra el mensaje en pantalla
-        }
-        Debug.Log("¡Perdiste por superar los 45 grados!");
+        gameOver = true;
+        
+        // Cambio de sprite a victoria
+        if (characterRenderer != null && spriteGanar != null) 
+            characterRenderer.sprite = spriteGanar;
+
+        // Reportar al GameManager global
+        if (GameManager.Instance != null) 
+            GameManager.Instance.ReportarVictoria();
+            
+        Debug.Log("¡Ganaste! Aguantaste el equilibrio.");
     }
 
-    public void ResetGame()
+    private void LoseGame()
     {
-        currentZRotation = 0;
-        isGameOver = false;
-        if (loseText != null)
-            loseText.SetActive(false);
+        gameOver = true;
+
+        // Cambio de sprite a derrota
+        if (characterRenderer != null && spritePerder != null) 
+            characterRenderer.sprite = spritePerder;
+
+        // Reportar al GameManager global
+        if (GameManager.Instance != null) 
+            GameManager.Instance.ReportarDerrota();
+
+        Debug.Log("¡Perdiste! Caíste.");
     }
+
+    // ----------------------------
+
     void ActualizarExpresion()
     {
         float inclinacion = Mathf.Abs(currentZRotation);
-
-        if (inclinacion < 15f) 
-        {
-            characterRenderer.sprite = spriteNormal;
-        }
-        else if (inclinacion >= 15f && inclinacion < 35f)
-        {
-            characterRenderer.sprite = spritePreocupado;
-        }
-        else // Más de 35 grados
-        {
-            characterRenderer.sprite = spriteSudando;
-        }
-    }
-    void OnGUI()
-    {
-        GUILayout.Label("¿Giroscopio habilitado?: " + Input.gyro.enabled);
-        GUILayout.Label("Rotación Actual: " + currentZRotation);
-        if (isGameOver) GUILayout.Label("ESTADO: PERDISTE");
+        if (inclinacion < 15f) characterRenderer.sprite = spriteNormal;
+        else if (inclinacion >= 15f && inclinacion < 35f) characterRenderer.sprite = spritePreocupado;
+        else characterRenderer.sprite = spriteSudando;
     }
 }
