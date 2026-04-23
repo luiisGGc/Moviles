@@ -6,43 +6,47 @@ public class LightChargeGame : MonoBehaviour
     [Header("Configuración")]
     public float cargaNecesaria = 100f;
     public float velocidadDescarga = 15f;
-    public float fuerzaFrotado = 2f; // Qué tanto carga por cada movimiento
+    public float fuerzaFrotado = 2f; 
+    public float tiempoLimite = 10f; // Añadido para tener condición de derrota
     
     [Header("Referencias")]
     public SpriteRenderer personajeRenderer;
     public Sprite spriteFrio;    
     public Sprite spriteFeliz;   
     public Slider barraCarga;
-    public GameObject winText;
 
     private float cargaActual = 0f;
-    private bool juegoActivo = true;
+    private float cronometro;
+    private bool gameOver = false; // Variable de control de estado
     private Vector2 ultimaPosicionTouch;
 
     void Start()
     {
-        if (winText != null) winText.SetActive(false);
+        cronometro = tiempoLimite;
         if (personajeRenderer != null) personajeRenderer.sprite = spriteFrio;
         if (barraCarga != null) barraCarga.maxValue = cargaNecesaria;
     }
 
     void Update()
     {
-        if (!juegoActivo) return;
+        if (gameOver) return; // Si el juego terminó, se detiene la lógica
+
+        // Lógica de tiempo
+        cronometro -= Time.deltaTime;
+        if (cronometro <= 0) LoseGame();
 
         bool estaFrotando = false;
 
-        // DETECTAR FRICCIÓN (Movimiento rápido del dedo)
+        // DETECTAR FRICCIÓN
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
             
             if (touch.phase == TouchPhase.Moved)
             {
-                // Calculamos cuánto se movió el dedo desde el frame anterior
                 float distanciaMovida = touch.deltaPosition.magnitude;
                 
-                if (distanciaMovida > 5f) // Si el movimiento es lo suficientemente rápido
+                if (distanciaMovida > 5f) 
                 {
                     cargaActual += distanciaMovida * fuerzaFrotado * Time.deltaTime;
                     estaFrotando = true;
@@ -50,20 +54,54 @@ public class LightChargeGame : MonoBehaviour
             }
         }
 
-        // LÓGICA DE DESCARGA (Si no frotas, se enfría)
         if (!estaFrotando)
         {
             cargaActual -= velocidadDescarga * Time.deltaTime;
         }
 
-        // ACTUALIZAR VISUALES
         cargaActual = Mathf.Clamp(cargaActual, 0, cargaNecesaria);
         if (barraCarga != null) barraCarga.value = cargaActual;
 
         ActualizarEstado();
 
-        if (cargaActual >= cargaNecesaria) FinalizarJuego();
+        if (cargaActual >= cargaNecesaria) WinGame();
     }
+
+    // --- ÚNICAMENTE LAS FUNCIONES SOLICITADAS ---
+
+    private void WinGame()
+    {
+        gameOver = true;
+        
+        if (personajeRenderer != null)
+        {
+            personajeRenderer.sprite = spriteFeliz;
+            personajeRenderer.color = Color.yellow;
+        }
+
+        // Reportar victoria al GameManager global
+        if (GameManager.Instance != null) 
+        {
+            GameManager.Instance.ReportarVictoria();
+        }
+        
+        Debug.Log("Victoria: Carga completada.");
+    }
+
+    private void LoseGame()
+    {
+        gameOver = true;
+
+        // Reportar derrota al GameManager global
+        if (GameManager.Instance != null) 
+        {
+            GameManager.Instance.ReportarDerrota();
+        }
+
+        Debug.Log("Derrota: Tiempo agotado.");
+    }
+
+    // --------------------------------------------
 
     void ActualizarEstado()
     {
@@ -74,18 +112,6 @@ public class LightChargeGame : MonoBehaviour
         else 
             personajeRenderer.sprite = spriteFrio;
 
-        // El color cambia de azul frío a blanco/amarillo caliente
         personajeRenderer.color = Color.Lerp(new Color(0.6f, 0.8f, 1f), Color.white, cargaActual / cargaNecesaria);
-    }
-
-    void FinalizarJuego()
-    {
-        juegoActivo = false;
-        if (winText != null) winText.SetActive(true);
-        if (personajeRenderer != null)
-        {
-            personajeRenderer.sprite = spriteFeliz;
-            personajeRenderer.color = Color.yellow;
-        }
     }
 }

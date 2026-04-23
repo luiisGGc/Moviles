@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     {
         ActualizarUI();
         SiguienteNivel();
+        menuPausa.SetActive(juegoPausado);
     }
 
     void Update()

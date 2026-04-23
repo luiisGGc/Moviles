@@ -124,7 +124,7 @@ public class MecanicaMetro : MonoBehaviour
 
             if (textoVictoria) textoVictoria.SetActive(true);
 
-            Debug.Log("¡Victoria! Nivel completado.");
+            Debug.Log("ï¿½Victoria! Nivel completado.");
 
             enabled = false;
         }

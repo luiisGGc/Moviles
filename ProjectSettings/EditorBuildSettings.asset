@@ -29,5 +29,29 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scripts/Carlos/Globo/InflarGlobo.unity
     guid: c1a8b0e63eef91946b879943f98590c3
+  - enabled: 1
+    path: Assets/Levels/nivel 1.unity
+    guid: e93210d7f05ceb8459ffe5de85a8c03b
+  - enabled: 1
+    path: Assets/Levels/nivel 2.unity
+    guid: fd4d96591cbf0404396426e3b3bf9276
+  - enabled: 1
+    path: Assets/Levels/nivel 3.unity
+    guid: f605293ecebfb3249a2005aded59b0c3
+  - enabled: 1
+    path: Assets/Levels/nivel 4.unity
+    guid: fc25a1c7a9bef4640b2cddf4a97eb3b9
+  - enabled: 1
+    path: Assets/Levels/nivel 5.unity
+    guid: 37e99b1636d19974987d36b1327cd29c
+  - enabled: 1
+    path: Assets/Scenes/GAS.unity
+    guid: ad2158cf72d99854aa933add5113d34c
+  - enabled: 1
+    path: Assets/Scenes/INCENDIO.unity
+    guid: 4235f406bebace84ebb8d73799ef60a9
+  - enabled: 1
+    path: Assets/Scenes/METRO.unity
+    guid: 6d5747cc4b1958a4d82f678b2c630717
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
