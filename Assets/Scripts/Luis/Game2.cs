@@ -4,96 +4,129 @@ public class CleanGameFinalV2 : MonoBehaviour
 {
     [Header("Configuración de Limpieza")]
     public int brushSize = 20;
-    
+    public float tiempoLimite = 5.0f; 
+    [Range(0.1f, 1f)]
+    public float porcentajeParaGanar = 0.85f; 
+
     [Header("Referencias Visuales")]
-    public GameObject cursorMano;       // Arrastra aquí el sprite de la mano
-    public ParticleSystem particulas;    // Arrastra aquí tu sistema de partículas
+    public GameObject cursorMano;
+    public ParticleSystem particulas;
+    public GameObject winText; 
+    public GameObject loseText; 
 
     private SpriteRenderer sRender;
     private Texture2D editableTex;
     private Color32[] pixels;
     private int width, height;
 
-   void Start()
-{
-    sRender = GetComponent<SpriteRenderer>();
-    if (sRender == null || sRender.sprite == null) return;
+    private float cronometro;
+    private bool juegoActivo = true;
+    private int totalPixelesMugre = 0;
+    private int pixelesLimpiados = 0;
 
-    // 1. Obtener la textura original y el rectángulo del sprite recortado
-    Texture2D sourceTex = sRender.sprite.texture;
-    Rect r = sRender.sprite.rect;
-
-    width = (int)r.width;
-    height = (int)r.height;
-
-    // 2. Crear la textura editable solo con el tamaño del recorte
-    editableTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-    
-    // 3. Extraer solo los píxeles del área recortada
-    pixels = sourceTex.GetPixels32(); // Nota: GetPixels32 obtiene todo, pero filtraremos
-    Color32[] croppedPixels = sourceTex.GetPixels32();
-    
-    // Obtenemos el bloque exacto de píxeles del sprite
-    Color32[] finalPixels = new Color32[width * height];
-    
-    int startX = (int)r.x;
-    int startY = (int)r.y;
-
-    for (int y = 0; y < height; y++)
+    void Start()
     {
-        for (int x = 0; x < width; x++)
+        cronometro = tiempoLimite;
+        if (winText != null) winText.SetActive(false);
+        if (loseText != null) loseText.SetActive(false);
+
+        sRender = GetComponent<SpriteRenderer>();
+        if (sRender == null || sRender.sprite == null) return;
+
+        Texture2D sourceTex = sRender.sprite.texture;
+        Rect r = sRender.sprite.rect;
+
+        width = (int)r.width;
+        height = (int)r.height;
+
+        editableTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color32[] croppedPixels = sourceTex.GetPixels32();
+        Color32[] finalPixels = new Color32[width * height];
+
+        int startX = (int)r.x;
+        int startY = (int)r.y;
+
+        for (int y = 0; y < height; y++)
         {
-            // Mapeamos del global al local
-            finalPixels[y * width + x] = croppedPixels[(startY + y) * sourceTex.width + (startX + x)];
+            for (int x = 0; x < width; x++)
+            {
+                Color32 pixelActual = croppedPixels[(startY + y) * sourceTex.width + (startX + x)];
+                finalPixels[y * width + x] = pixelActual;
+
+                if (pixelActual.a > 10)
+                {
+                    totalPixelesMugre++;
+                }
+            }
         }
+
+        pixels = finalPixels;
+        editableTex.SetPixels32(pixels);
+        editableTex.Apply();
+        sRender.sprite = Sprite.Create(editableTex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f));
+
+        if (cursorMano != null) cursorMano.SetActive(false);
+        if (particulas != null) particulas.Stop();
     }
 
-    // 4. Asignar los píxeles filtrados a nuestra textura de trabajo
-    pixels = finalPixels;
-    editableTex.SetPixels32(pixels);
-    editableTex.Apply();
-
-    // 5. Reemplazar el sprite visual por nuestra versión editable
-    sRender.sprite = Sprite.Create(editableTex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f));
-
-    // Inicializar mano y partículas
-    if (cursorMano != null) cursorMano.SetActive(false);
-    if (particulas != null) particulas.Stop();
-}
-   void Update()
-{
-    if (Input.touchCount > 0) 
+    void Update()
     {
-        Touch touch = Input.GetTouch(0);
-
-        if (touch.phase == TouchPhase.Began)
+        if (!juegoActivo) return;
+        cronometro -= Time.deltaTime;
+        if (cronometro <= 0)
         {
-            // El signo "?" verifica si existe antes de actuar
-            cursorMano?.SetActive(true);
-            particulas?.Play();
+            FinalizarJuego(false);
+            return;
         }
 
-        if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+        bool interactuando = false;
+        bool inicioInteraccion = false;
+        bool finInteraccion = false;
+        Vector3 inputPosition = Vector3.zero;
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetMouseButtonDown(0)) { inicioInteraccion = true; interactuando = true; }
+        else if (Input.GetMouseButton(0)) { interactuando = true; }
+        else if (Input.GetMouseButtonUp(0)) { finInteraccion = true; }
+        inputPosition = Input.mousePosition;
+#else
+        // Soporte para Táctil en Celular
+        if (Input.touchCount > 0) 
+        {
+            Touch touch = Input.GetTouch(0);
+            inputPosition = touch.position;
+            if (touch.phase == TouchPhase.Began) { inicioInteraccion = true; interactuando = true; }
+            else if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) { interactuando = true; }
+            else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) { finInteraccion = true; }
+        }
+#endif
+
+        if (inicioInteraccion)
+        {
+            if (cursorMano != null) cursorMano.SetActive(true);
+            if (particulas != null) particulas.Play();
+        }
+
+        if (interactuando)
         {
             if (Camera.main == null) return;
-            
-            Vector3 touchWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, -Camera.main.transform.position.z));
+
+            Vector3 touchWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(inputPosition.x, inputPosition.y, -Camera.main.transform.position.z));
             touchWorldPos.z = 0;
 
-            // Movemos solo si las referencias no son nulas
             if (cursorMano != null) cursorMano.transform.position = touchWorldPos;
             if (particulas != null) particulas.transform.position = touchWorldPos;
 
-            HandleCleaning(touch.position);
+            HandleCleaning(inputPosition);
         }
 
-        if (touch.phase == TouchPhase.Ended)
+        if (finInteraccion)
         {
-            cursorMano?.SetActive(false);
-            particulas?.Stop();
+            if (cursorMano != null) cursorMano.SetActive(false);
+            if (particulas != null) particulas.Stop();
         }
     }
-}
+
     void HandleCleaning(Vector2 screenPosition)
     {
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, -Camera.main.transform.position.z));
@@ -126,10 +159,11 @@ public class CleanGameFinalV2 : MonoBehaviour
                     if (dist < brushSize)
                     {
                         int index = y * width + x;
-                        if (pixels[index].a != 0)
+                        if (pixels[index].a != 0) 
                         {
-                            pixels[index] = new Color32(0, 0, 0, 0);
+                            pixels[index] = new Color32(0, 0, 0, 0); 
                             changed = true;
+                            pixelesLimpiados++;
                         }
                     }
                 }
@@ -140,6 +174,30 @@ public class CleanGameFinalV2 : MonoBehaviour
         {
             editableTex.SetPixels32(pixels);
             editableTex.Apply();
+            float progreso = (float)pixelesLimpiados / totalPixelesMugre;
+            if (progreso >= porcentajeParaGanar)
+            {
+                FinalizarJuego(true);
+            }
+        }
+    }
+
+    void FinalizarJuego(bool victoria)
+    {
+        juegoActivo = false;
+
+        if (cursorMano != null) cursorMano.SetActive(false);
+        if (particulas != null) particulas.Stop();
+
+        if (victoria)
+        {
+            if (winText != null) winText.SetActive(true);
+            if (GameManager.Instance != null) GameManager.Instance.ReportarVictoria();
+        }
+        else
+        {
+            if (loseText != null) loseText.SetActive(true);
+            if (GameManager.Instance != null) GameManager.Instance.ReportarDerrota();
         }
     }
 }

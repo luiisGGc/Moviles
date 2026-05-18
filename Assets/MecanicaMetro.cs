@@ -34,19 +34,26 @@ public class MecanicaMetro : MonoBehaviour
     private bool juegoGanado = false;
     private bool juegoTerminado = false;
 
+    private bool reportadoAlGameManager = false;
+
     void Awake()
     {
-        if (Puerta_Izq != null) Puerta_Izq.transform.SetParent(null);
-        if (Puerta_Der != null) Puerta_Der.transform.SetParent(null);
-
-        posCerradaIzquierda = Puerta_Izq.transform.localPosition;
-        posCerradaDerecha = Puerta_Der.transform.localPosition;
+        if (Puerta_Izq != null)
+        {
+            Puerta_Izq.transform.SetParent(null);
+            posCerradaIzquierda = Puerta_Izq.transform.localPosition;
+        }
+        if (Puerta_Der != null)
+        {
+            Puerta_Der.transform.SetParent(null);
+            posCerradaDerecha = Puerta_Der.transform.localPosition;
+        }
     }
 
     void Start()
     {
-        Puerta_Izq.transform.localPosition = posCerradaIzquierda + new Vector3(-distanciaApertura, 0, 0);
-        Puerta_Der.transform.localPosition = posCerradaDerecha + new Vector3(distanciaApertura, 0, 0);
+        if (Puerta_Izq != null) Puerta_Izq.transform.localPosition = posCerradaIzquierda + new Vector3(-distanciaApertura, 0, 0);
+        if (Puerta_Der != null) Puerta_Der.transform.localPosition = posCerradaDerecha + new Vector3(distanciaApertura, 0, 0);
 
         tiempoActual = tiempoMaximo;
 
@@ -56,22 +63,42 @@ public class MecanicaMetro : MonoBehaviour
 
     void Update()
     {
-        if (juegoGanado || juegoTerminado)
+        if (juegoTerminado) return;
+
+        if (juegoGanado)
         {
-            if (juegoGanado) CerrarPuertasAnimacion();
+            CerrarPuertasAnimacion();
             return;
         }
 
         ManejarCronometro();
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            posicionInicial = Input.mousePosition;
-        }
+        if (juegoTerminado) return;
 
-        if (Input.GetMouseButtonUp(0))
+        bool inicioToque = false;
+        bool finToque = false;
+        Vector2 inputPos = Vector2.zero;
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetMouseButtonDown(0)) { inicioToque = true; inputPos = Input.mousePosition; }
+        if (Input.GetMouseButtonUp(0)) { finToque = true; inputPos = Input.mousePosition; }
+#else
+        // Soporte Celular
+        if (Input.touchCount > 0)
         {
-            posicionFinal = Input.mousePosition;
+            Touch touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began) { inicioToque = true; inputPos = touch.position; }
+            if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) { finToque = true; inputPos = touch.position; }
+        }
+#endif
+
+        if (inicioToque)
+        {
+            posicionInicial = inputPos;
+        }
+        else if (finToque)
+        {
+            posicionFinal = inputPos;
             AnalizarSwipe();
         }
     }
@@ -90,13 +117,19 @@ public class MecanicaMetro : MonoBehaviour
             textoReloj.text = tiempoActual.ToString("F0") + "s";
         }
 
-        if (tiempoActual <= 0)
+        if (tiempoActual <= 0 && !juegoGanado)
         {
             tiempoActual = 0;
             juegoTerminado = true;
+
             if (grupoTutorial) grupoTutorial.SetActive(false);
             if (textoPerdiste) textoPerdiste.SetActive(true);
-            Debug.Log("Tiempo agotado.");
+
+            if (!reportadoAlGameManager && GameManager.Instance != null)
+            {
+                reportadoAlGameManager = true;
+                GameManager.Instance.ReportarDerrota();
+            }
         }
     }
 
@@ -114,6 +147,8 @@ public class MecanicaMetro : MonoBehaviour
 
     void CerrarPuertasAnimacion()
     {
+        if (Puerta_Izq == null || Puerta_Der == null) return;
+
         Puerta_Izq.transform.localPosition = Vector3.MoveTowards(Puerta_Izq.transform.localPosition, posCerradaIzquierda, velocidadCierre * Time.deltaTime);
         Puerta_Der.transform.localPosition = Vector3.MoveTowards(Puerta_Der.transform.localPosition, posCerradaDerecha, velocidadCierre * Time.deltaTime);
 
@@ -123,10 +158,13 @@ public class MecanicaMetro : MonoBehaviour
             Puerta_Der.transform.localPosition = posCerradaDerecha;
 
             if (textoVictoria) textoVictoria.SetActive(true);
+            if (!reportadoAlGameManager && GameManager.Instance != null)
+            {
+                reportadoAlGameManager = true;
+                GameManager.Instance.ReportarVictoria();
+            }
 
-            Debug.Log("¡Victoria! Nivel completado.");
-
-            enabled = false;
+            enabled = false; // Apaga el script
         }
     }
 }
